@@ -95,6 +95,7 @@ public:
         AUTOROTATE =   26,  // Autonomous autorotation
         AUTO_RTL =     27,  // Auto RTL, this is not a true mode, AUTO will report as this mode if entered to perform a DO_LAND_START Landing sequence
         TURTLE =       28,  // Flip over after crash
+        DRAWSTAR  =    29,  // 五角星航线模式。 注意，随着官方固件版本的更新，这里最新的模式数字已经增加到了27，因此仿真时用“mode 27”来切到此模式
 
         // Mode number 127 reserved for the "drone show mode" in the Skybrush
         // fork at https://github.com/skybrush-io/ardupilot
@@ -1743,6 +1744,37 @@ private:
     uint32_t last_throttle_warning_output_ms;
 };
 #endif
+class ModeDrawStar : public Mode {
+
+public:
+    // inherit constructor
+    using Mode::Mode;
+
+    bool init(bool ignore_checks) override;
+    void run() override;
+
+    bool requires_GPS() const override { return true; }  // 此模式需要有GPS定位
+    bool has_manual_throttle() const override { return false; }  // 此模式不允许手动控制油门
+    bool allows_arming(AP_Arming::Method method) const override { return false; }  // 不允许在此模式下解锁
+    bool is_autopilot() const override { return true; }  // 此模式为自动飞行控制
+    bool has_user_takeoff(bool must_navigate) const override { return false; }  // 不允许在此模式下直接起飞（必须是在空中切到此模式）
+    bool in_guided_mode() const override { return true; }  // 此模式是一种引导的模式
+
+protected:
+
+    const char *name() const override { return "DRAW_STAR"; }
+    const char *name4() const override { return "STAR"; }
+
+private:
+    Vector3f path[10];  // 航点数组
+    int path_num;  // 当前航点号
+
+    void generate_path();  // 生成航线
+    void pos_control_start();  // 开始位置控制
+    void pos_control_run();  // 位置控制周期调用函数
+
+};
+
 
 // modes below rely on Guided mode so must be declared at the end (instead of in alphabetical order)
 

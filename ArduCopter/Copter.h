@@ -227,6 +227,7 @@ public:
     friend class ModeZigZag;
     friend class ModeAutorotate;
     friend class ModeTurtle;
+    friend class ModeDrawStar;  // 这里必须加上，否则无法在模式中调用copter对象
 
     friend class _AutoTakeoff;
 
@@ -1052,6 +1053,9 @@ private:
 #endif
 #if MODE_TURTLE_ENABLED == ENABLED
     ModeTurtle mode_turtle;
+#endif
+#if MODE_DRAWSTAR_ENABLED == ENABLED
+    ModeDrawStar* mode_drawstar;
 #endif
 
     // mode.cpp
